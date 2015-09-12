@@ -5,31 +5,32 @@ require_relative '../dsl_functions'
 
 module GraphElementsInterface
   def draw_menu
-    flow do
-      @place_name_field = edit_line
-      @add_place_field = draw_button("Add place") do
-        add_place_action
+    flow(height: 100, attach: Window) do
+      flow do
+        @place_name_field = edit_line
+        @add_place_field = draw_button("Add place") do
+          add_place_action
+        end
       end
-    end
 
-    flow do
-      @start_node_field = list_box(items: Page::created.places.map(&:name) + [""])
-      @end_node_field = list_box(items: Page::created.places.map(&:name) + [""])
-      @trans_name_field = edit_line
-      add_transition = draw_button("Add transition") do
-        add_transition_action
+      flow do
+        @start_node_field = list_box(items: Page::created.places.map(&:name) + [""])
+        @end_node_field = list_box(items: Page::created.places.map(&:name) + [""])
+        @trans_name_field = edit_line
+        add_transition = draw_button("Add transition") do
+          add_transition_action
+        end
       end
-    end
 
-    flow do
-      @export_field = draw_button("Export") do
-        export_action
+      flow do
+        @export_field = draw_button("Export") do
+          export_action
+        end
       end
     end
   end
 
   def draw_net
-    @net_image.clear
     @net_image = image "tmp/output.png"
   end
 
@@ -49,6 +50,7 @@ module GraphElementsInterface
       Page::created.places << Place.new(name, {})
       Page::created.add_place(name)
       Page::created.draw
+
       update
     end
   end
@@ -76,7 +78,7 @@ module GraphElementsInterface
   end
 
   def export_action
-    window(width:200, height:200) do
+    window(width: 200, height: 200) do
       stack do
         para "Enter file name:"
         @file_name_field = edit_line

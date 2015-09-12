@@ -5,8 +5,8 @@ def page(name)
   Page::created.draw
 end
 
-def place(name, **methods)
-  new_place = Place.new(name, **methods)
+def place(name, methods = nil)
+  new_place = Place.new(name, methods)
   Page::created.places << new_place
   new_place
 end

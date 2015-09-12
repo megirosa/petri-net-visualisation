@@ -7,7 +7,7 @@ class Page
     @@created
   end
   
-  def self.created= (value)
+  def self.created=(value)
     @@created = value
   end
 

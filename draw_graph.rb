@@ -1,18 +1,17 @@
-require 'green_shoes'
+require 'shoes'
 require 'ruby-graphviz'
 
 require_relative 'modules/graph_elements_interface'
 
-load ARGV[0]
+load ARGV[1]
 
 Shoes.app(width: 800, title: "Petri Net") do
   extend GraphElementsInterface
 
   def update
-    @app.append do
-      draw_menu
-      draw_net
-    end
+    clear
+    draw_menu
+    draw_net
   end
 
   update
