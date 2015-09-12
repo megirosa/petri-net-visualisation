@@ -8,11 +8,5 @@ load ARGV[1]
 Shoes.app(width: 800, title: "Petri Net") do
   extend GraphElementsInterface
 
-  def update
-    clear
-    draw_menu
-    draw_net
-  end
-
   update
 end

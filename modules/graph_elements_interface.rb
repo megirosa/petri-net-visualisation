@@ -1,33 +1,48 @@
-require_relative '../page'
-require_relative '../place'
-require_relative '../transition'
-require_relative '../dsl_functions'
+require_relative '../graph_drawer'
 
 module GraphElementsInterface
+  attr_accessor :drawer
+
+  def update
+    @drawer = GraphDrawer.new
+
+    clear
+    draw_menu
+    draw_net
+  end
+
   def draw_menu
-    flow(height: 100, attach: Window) do
+    flow(height: 100) do
       flow do
-        @place_name_field = edit_line
-        @add_place_field = draw_button("Add place") do
-          add_place_action
-        end
+        place_name = edit_line
+        draw_button("Add place") { add_place_action(place_name.text) }
       end
 
       flow do
-        @start_node_field = list_box(items: Page::created.places.map(&:name) + [""])
-        @end_node_field = list_box(items: Page::created.places.map(&:name) + [""])
-        @trans_name_field = edit_line
-        add_transition = draw_button("Add transition") do
-          add_transition_action
-        end
+        start_name = list_box(items: drawer.places_to_select)
+        end_name = list_box(items: drawer.places_to_select)
+        trans_name = edit_line
+        draw_button("Add transition") { add_transition_action(start_name.text, end_name.text, trans_name.text) }
       end
 
       flow do
-        @export_field = draw_button("Export") do
-          export_action
-        end
+        draw_button("Export") { export_action }
       end
     end
+  end
+
+  def add_place_action(name)
+    drawer.add_place(name)
+    update
+  rescue GraphDrawer::DrawingError => e
+    puts "Could not add place. #{e.message}"
+  end
+
+  def add_transition_action(start_name, end_name, trans_name)
+    drawer.add_transition(start_name, end_name, trans_name)
+    update
+  rescue GraphDrawer::DrawingError => e
+    puts "Could not add transition. #{e.message}"
   end
 
   def draw_net
@@ -44,48 +59,15 @@ module GraphElementsInterface
     end
   end
 
-  def add_place_action
-    name = @place_name_field.text
-    if !name.empty? && !Page::created.find_place(name)
-      Page::created.places << Place.new(name, {})
-      Page::created.add_place(name)
-      Page::created.draw
-
-      update
-    end
-  end
-
-  def add_transition_action
-    start_name = @start_node_field.text
-    end_name = @end_node_field.text
-    transition_name = @trans_name_field.text
-    if !transition_name.empty? && !(end_name.empty? && start_name.empty?)
-      Page::created.add_transition(transition_name)
-      unless start_name.empty?
-        Page::created.add_edge(start_name, transition_name) 
-        Page::created.find_transition(transition_name).input_places << 
-          Page::created.find_place(start_name)
-      end
-      unless end_name.empty?
-        Page::created.add_edge(transition_name, end_name)
-        Page::created.find_transition(transition_name).output_places << 
-          Page::created.find_place(end_name)
-      end
-      Page::created.draw
-      
-      update
-    end
-  end
-
   def export_action
     window(width: 200, height: 200) do
       stack do
         para "Enter file name:"
-        @file_name_field = edit_line
+        file_name = edit_line
         @ok_field = button "Export" do
           begin
-            File.open("#{@file_name_field.text}.rb", 'w') do |file| 
-              file.write(Page::created.export(@file_name_field.text))
+            File.open("export/#{@file_name.text}.rb", 'w') do |file| 
+              file.write(Page::created.export(file_name.text))
             end
             close
           rescue
