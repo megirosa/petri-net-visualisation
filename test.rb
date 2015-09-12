@@ -3,8 +3,8 @@ page :strona do
     done = place "done"
 
     transition "work" do
-       input process
-       output done do
+        input process
+        output done do
     end
   end
 end

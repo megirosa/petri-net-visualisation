@@ -9,7 +9,6 @@ Shoes.app(width: 800, title: "Petri Net") do
   extend GraphElementsInterface
 
   def update
-
     @app.append do
       draw_menu
       draw_net

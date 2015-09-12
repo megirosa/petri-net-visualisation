@@ -30,7 +30,7 @@ module GraphElementsInterface
 
   def draw_net
     @net_image.clear
-    @net_image = image "temp/output.png"
+    @net_image = image "tmp/output.png"
   end
 
   def draw_button(label)

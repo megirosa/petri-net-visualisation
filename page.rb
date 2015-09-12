@@ -57,7 +57,7 @@ class Page
   end
 
   def draw
-    @graph.output(png: "output.png")
+    @graph.output(png: "tmp/output.png")
   end
 
   def find_transition(name)
