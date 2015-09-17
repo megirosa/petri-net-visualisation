@@ -12,20 +12,26 @@ module GraphElementsInterface
   end
 
   def draw_menu
-    flow(height: 100) do
-      flow do
+    flow(height: 200) do
+      stack(width: 250, margin: 10) do
+        caption "Add new place"
+        para "Name:"
         place_name = edit_line
         draw_button("Add place") { add_place_action(place_name.text) }
       end
 
-      flow do
+      stack(width: 250, margin: 10) do
+        caption "Add new transition"
+        para "Start place:"
         start_name = list_box(items: drawer.places_to_select)
+        para "End place:"
         end_name = list_box(items: drawer.places_to_select)
+        para "Name:"
         trans_name = edit_line
         draw_button("Add transition") { add_transition_action(start_name.text, end_name.text, trans_name.text) }
       end
 
-      flow do
+      stack(width: 250, margin: 10) do
         draw_button("Export") { export_action }
       end
     end
@@ -46,7 +52,7 @@ module GraphElementsInterface
   end
 
   def draw_net
-    @net_image = image "tmp/output.png"
+    image("tmp/output.png", margin: 10)
   end
 
   def draw_button(label)
@@ -60,13 +66,13 @@ module GraphElementsInterface
   end
 
   def export_action
-    window(width: 200, height: 200) do
-      stack do
+    window(width: 250, height: 250, title: "Export to file") do
+      stack(margin: 10) do
         para "Enter file name:"
         file_name = edit_line
-        @ok_field = button "Export" do
+        button "Export" do
           begin
-            File.open("export/#{@file_name.text}.rb", 'w') do |file| 
+            File.open("export/#{file_name.text}.rb", 'w') do |file| 
               file.write(Page::created.export(file_name.text))
             end
             close

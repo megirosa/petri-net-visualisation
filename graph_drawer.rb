@@ -29,12 +29,12 @@ class GraphDrawer
 
     current_page.add_transition(transition_name)
     
-    unless start_name.empty?
+    unless start_name.nil?
       current_page.add_edge(start_name, transition_name) 
       current_page.find_transition(transition_name).input_places << current_page.find_place(start_name)
     end
 
-    unless end_name.empty?
+    unless end_name.nil?
       current_page.add_edge(transition_name, end_name)
       current_page.find_transition(transition_name).output_places << current_page.find_place(end_name)
     end
