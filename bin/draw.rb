@@ -1,12 +1,12 @@
 require 'shoes'
 require 'ruby-graphviz'
 
-require_relative 'modules/graph_elements_interface'
+require_relative '../lib/interface_elements'
 
 load ARGV[1]
 
 Shoes.app(width: 800, title: "Petri Net") do
-  extend GraphElementsInterface
+  extend InterfaceElements
 
   update
 end

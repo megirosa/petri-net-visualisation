@@ -1,6 +1,6 @@
-require_relative '../graph_drawer'
+require_relative 'graph_drawer'
 
-module GraphElementsInterface
+module InterfaceElements
   attr_accessor :drawer
 
   def update
