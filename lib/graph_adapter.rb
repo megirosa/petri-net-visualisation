@@ -1,5 +1,5 @@
 class GraphAdapter
-  attr_accessor :nodes, :edges, :graph
+  attr_accessor :nodes, :edges, :graph, :parsed_graph
 
   def initialize
     @nodes = {}
@@ -43,5 +43,65 @@ class GraphAdapter
 
   def draw
     graph.output(png: "tmp/output.png")
+  end
+
+  def place_node(cursor_x, cursor_y, node_name)
+    puts node_name
+    parse_graph
+    convert_positions
+
+    node = graph.get_node(node_name)
+
+    if node
+      node[:color] = "black"
+      draw
+    end
+  end
+
+  def select_node(cursor_x, cursor_y)
+    node_name = find_node(cursor_x, cursor_y)
+    if node_name
+      node = graph.get_node(node_name)
+      node[:color] = "coral"
+      draw
+    end
+    node_name
+  end
+
+  private
+
+  def find_node(cursor_x, cursor_y)
+    parse_graph
+    convert_positions
+    nodes.each do |node_name, positions|
+      node_x = positions[0]
+      node_y = positions[1]
+      distance = calculate_distance(node_x, node_y, cursor_x, cursor_y)
+
+      return node_name if distance < 10 
+    end 
+
+    nil
+  end
+
+  def calculate_distance(node_x, node_y, cursor_x, cursor_y)
+    Math.sqrt((node_x - cursor_x) ** 2 + (node_y - cursor_y) ** 2)
+  end
+
+  def graph_height
+    parsed_graph['bb'].to_s.tr('"','').split(',').last.to_i
+  end
+
+  def convert_positions
+    parsed_graph.each_node do |name, node|
+      nodes[name] = node[:pos].to_s.tr('"','').split(',').map(&:to_i)
+      nodes[name][1] = (graph_height - nodes[name][1]) * 1.37 + 4
+      nodes[name][0] = nodes[name][0] * 1.37 + 4
+    end
+  end
+
+  def parse_graph
+    graph.output(dot: "tmp/output.dot")
+    GraphViz.parse("tmp/output.dot") { |g| @parsed_graph = g }
   end
 end

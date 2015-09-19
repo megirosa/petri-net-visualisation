@@ -4,10 +4,11 @@ require_relative 'transition'
 require_relative 'dsl_functions'
 
 class GraphDrawer
-  attr_accessor :current_page, :graph
+  attr_accessor :current_page, :adapter
 
   def initialize
     @current_page = Page::created
+    @adapter = @current_page.adapter
   end
 
   def places_to_select
@@ -42,12 +43,13 @@ class GraphDrawer
     current_page.draw
   end
 
-  def place_node
+  def place_node(cursor_x, cursor_y, node_name)
+    adapter.place_node(cursor_x, cursor_y, node_name)
     true
   end
 
-  def select_node
-    true
+  def select_node(cursor_x, cursor_y)
+    adapter.select_node(cursor_x, cursor_y)
   end
 
   class DrawingError < StandardError; end

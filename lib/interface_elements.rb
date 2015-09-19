@@ -5,7 +5,6 @@ module InterfaceElements
 
   def update
     @drawer = GraphDrawer.new
-    @allow_move = false
 
     clear
     draw_menu
@@ -56,20 +55,21 @@ module InterfaceElements
   def draw_net
     @net_image = image("tmp/output.png", margin: 10)
     @net_image.click do |image|
-      edited = if moving_allowed?
-        puts "node placed"
-        drawer.place_node
+      @edited = if moving_allowed?
+        drawer.place_node(cursor_x, cursor_y, @edited)
       else
-        puts "node selected"
-        drawer.select_node
+        drawer.select_node(cursor_x, cursor_y)
       end
 
-      toggle_move if edited
+      if @edited
+        @net_image.path = "tmp/output.png"
+        toggle_move
+      end
     end
   end
 
   def draw_hover
-    @hover_circle = oval(mouse[1], mouse[2], 50, 50, 
+    @hover_circle = oval(mouse[1] - 25, mouse[2] - 25, 50, 50, 
       fill: rgb(175, 238, 238, 0.5), 
       stroke: rgb(175, 238, 238),
       hidden: true)
@@ -117,5 +117,13 @@ module InterfaceElements
 
   def moving_allowed?
     @allow_move
+  end
+
+  def cursor_x
+    mouse[1] - @net_image.left
+  end
+
+  def cursor_y
+    mouse[2] - @net_image.top
   end
 end
