@@ -42,5 +42,13 @@ class GraphDrawer
     current_page.draw
   end
 
+  def place_node
+    true
+  end
+
+  def select_node
+    true
+  end
+
   class DrawingError < StandardError; end
 end
