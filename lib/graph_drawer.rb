@@ -4,7 +4,7 @@ require_relative 'transition'
 require_relative 'dsl_functions'
 
 class GraphDrawer
-  attr_accessor :current_page
+  attr_accessor :current_page, :graph
 
   def initialize
     @current_page = Page::created
