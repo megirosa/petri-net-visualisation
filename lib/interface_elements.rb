@@ -41,6 +41,7 @@ module InterfaceElements
         stack(margin_top: 10) do
           caption "Layout algorithm"
           layout_algorithm_name = list_box(items: layout_algorithms_list)
+          draw_button("Change") { change_layout_action(layout_algorithm_name.text) }
         end
       end
     end
@@ -58,6 +59,11 @@ module InterfaceElements
     update
   rescue GraphDrawer::DrawingError => e
     puts "Could not add transition. #{e.message}"
+  end
+
+  def change_layout_action(layout)
+    drawer.change_layout(layout)
+    update
   end
 
   def draw_net

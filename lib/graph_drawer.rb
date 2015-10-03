@@ -52,5 +52,9 @@ class GraphDrawer
     adapter.select_node(cursor_x, cursor_y)
   end
 
+  def change_layout(layout)
+    adapter.change_layout(layout)
+  end
+
   class DrawingError < StandardError; end
 end

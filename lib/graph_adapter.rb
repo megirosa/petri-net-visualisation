@@ -139,7 +139,7 @@ class GraphAdapter
 
     IO.write("tmp/updated.dot", graph_edited_lines)
 
-    updated_graph = GraphViz.parse("tmp/updated.dot")
-    updated_graph.output(png: "tmp/output.png", use: "neato")
+    parsed_graph = GraphViz.parse("tmp/updated.dot")
+    parsed_graph.output(png: "tmp/output.png", use: "neato")
   end
 end
