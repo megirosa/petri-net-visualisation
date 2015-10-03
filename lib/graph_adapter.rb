@@ -1,7 +1,9 @@
 class GraphAdapter
-  attr_accessor :nodes, :edges, :graph, :parsed_graph
+  attr_accessor :nodes, :edges, :graph, :parsed_graph, :layout
 
-  def initialize
+  def initialize(layout = "dot")
+    @layout = layout
+
     @nodes = {}
     @edges = {}
 
@@ -42,7 +44,7 @@ class GraphAdapter
   end
 
   def draw
-    graph.output(png: "tmp/output.png")
+    graph.output(png: "tmp/output.png", use: layout)
   end
 
   def place_node(cursor_x, cursor_y, node_name)
@@ -65,6 +67,11 @@ class GraphAdapter
       draw
     end
     node_name
+  end
+
+  def change_layout(layout)
+    @layout = layout
+    draw
   end
 
   private
@@ -113,7 +120,7 @@ class GraphAdapter
       if line.include?("label=#{node_name}")
         update_next_position = true
         line
-      elsif (line =~ /pos=/) && !(line =~ /\-\>/)
+      elsif (line =~ /pos=/) && !(line =~ /(\-\>)|(\]\;$)/)
         if update_next_position
           line.sub!(/\d\d/){ |match| ((x-4) /72.0/1.37).round(3).to_s }
           line.sub!(/,\d\d/){ |match| ','+((graph_height-y-4) /72.0/1.37).round(3).to_s }

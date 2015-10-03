@@ -33,7 +33,15 @@ module InterfaceElements
       end
 
       stack(width: 250, margin: 10) do
-        draw_button("Export") { export_action }
+        stack do
+          caption "Save DSL file"
+          draw_button("Export") { export_action }
+        end
+
+        stack(margin_top: 10) do
+          caption "Layout algorithm"
+          layout_algorithm_name = list_box(items: layout_algorithms_list)
+        end
       end
     end
   end
@@ -125,5 +133,9 @@ module InterfaceElements
 
   def cursor_y
     mouse[2] - @net_image.top
+  end
+
+  def layout_algorithms_list
+    %w(dot neato twopi circo fdp)
   end
 end
