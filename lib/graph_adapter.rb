@@ -47,8 +47,7 @@ class GraphAdapter
 
   def place_node(cursor_x, cursor_y, node_name)
     puts node_name
-    parse_graph
-    convert_positions
+    update_graph_file(cursor_x, cursor_y, node_name)
 
     node = graph.get_node(node_name)
 
@@ -78,7 +77,7 @@ class GraphAdapter
       node_y = positions[1]
       distance = calculate_distance(node_x, node_y, cursor_x, cursor_y)
 
-      return node_name if distance < 10 
+      return node_name if distance < 20 
     end 
 
     nil
@@ -103,5 +102,37 @@ class GraphAdapter
   def parse_graph
     graph.output(dot: "tmp/output.dot")
     GraphViz.parse("tmp/output.dot") { |g| @parsed_graph = g }
+  end
+
+  def update_graph_file(x, y, node_name)
+    graph_file = IO.read("tmp/output.dot")
+
+    update_next_position = false
+
+    graph_edited_lines = graph_file.lines.map do |line|
+      if line.include?("label=#{node_name}")
+        update_next_position = true
+        line
+      elsif (line =~ /pos=/) && !(line =~ /\-\>/)
+        if update_next_position
+          line.sub!(/\d\d/){ |match| ((x-4) /72.0/1.37).round(3).to_s }
+          line.sub!(/,\d\d/){ |match| ','+((graph_height-y-4) /72.0/1.37).round(3).to_s }
+
+          line.gsub!(/\d"/){ |match| "#{match[0]}!\"" }
+          update_next_position = false
+        else
+          line.gsub!(/\d\d/){ |match| (1/72.0*match.to_i/1.37).round(3).to_s }
+          line.gsub!(/\d"/){ |match| "#{match[0]}!\"" }
+        end
+        line
+      else
+        line
+      end
+    end.join
+
+    IO.write("tmp/updated.dot", graph_edited_lines)
+
+    updated_graph = GraphViz.parse("tmp/updated.dot")
+    updated_graph.output(png: "tmp/output.png", use: "neato")
   end
 end
