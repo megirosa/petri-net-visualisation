@@ -5,6 +5,7 @@ module InterfaceElements
 
   def update
     @drawer = GraphDrawer.new
+    @net_image.clear if @net_image
 
     clear
     draw_menu
