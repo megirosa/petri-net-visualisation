@@ -5,7 +5,7 @@ module InterfaceElements
 
   def update
     @drawer = GraphDrawer.new
-    @net_image.clear if @net_image
+    $net_image.remove if $net_image
 
     clear
     draw_menu
@@ -68,8 +68,8 @@ module InterfaceElements
   end
 
   def draw_net
-    @net_image = image("tmp/output.png", margin: 10)
-    @net_image.click do |image|
+    $net_image = image("tmp/output.png", margin: 10)
+    $net_image.click do |image|
       @edited = if moving_allowed?
         drawer.place_node(cursor_x, cursor_y, @edited)
       else
@@ -77,7 +77,7 @@ module InterfaceElements
       end
 
       if @edited
-        @net_image.path = "tmp/output.png"
+        $net_image.path = "tmp/output.png"
         toggle_move
       end
     end
@@ -135,11 +135,11 @@ module InterfaceElements
   end
 
   def cursor_x
-    mouse[1] - @net_image.left
+    mouse[1] - $net_image.left
   end
 
   def cursor_y
-    mouse[2] - @net_image.top
+    mouse[2] - $net_image.top
   end
 
   def layout_algorithms_list

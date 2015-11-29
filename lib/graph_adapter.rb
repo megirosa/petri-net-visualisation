@@ -1,6 +1,8 @@
 require_relative 'graph_file_writer'
+require_relative 'calculations'
 
 class GraphAdapter
+  include Calculations
   attr_accessor :nodes, :edges, :graph, :parsed_graph, :layout, :writer
 
   def initialize(layout = "dot")
@@ -54,13 +56,12 @@ class GraphAdapter
   def place_node(cursor_x, cursor_y, node_name)
     puts node_name
     writer.freeze_positions
-    writer.update_position(cursor_x, cursor_y, graph_height, node_name)
+    writer.update_position(cursor_x, cursor_y, to_pixels(graph_height), node_name)
 
     node = graph.get_node(node_name)
 
     if node
       node[:color] = "black"
-      draw
     end
   end
 
@@ -89,7 +90,7 @@ class GraphAdapter
       node_y = positions[1]
       distance = calculate_distance(node_x, node_y, cursor_x, cursor_y)
 
-      return node_name if distance < 20 
+      return node_name if distance < 30 
     end 
 
     nil
@@ -100,19 +101,31 @@ class GraphAdapter
   end
 
   def graph_height
-    parsed_graph['bb'].to_s.tr('"','').split(',').last.to_i
+    if $net_image
+      to_points($net_image.height)
+    else
+      parsed_graph['bb'].to_s.tr('"','').split(',').last.to_i
+    end
   end
 
   def convert_positions
     parsed_graph.each_node do |name, node|
       nodes[name] = node[:pos].to_s.tr('"','').split(',').map(&:to_i)
-      nodes[name][1] = (graph_height - nodes[name][1]) * 1.37 + 4
-      nodes[name][0] = nodes[name][0] * 1.37 + 4
+      # 4 - frame size
+      nodes[name][1] = to_pixels((graph_height - nodes[name][1])) + 4
+      nodes[name][0] = to_pixels(nodes[name][0]) + 4
     end
   end
 
   def parse_graph
-    graph.output(dot: "tmp/output.dot", use: layout)
+    unless was_outputed_at_least_once?
+      graph.output(dot: "tmp/output.dot", use: layout)
+      @was_outputed_at_least_once = true
+    end
     GraphViz.parse("tmp/output.dot") { |g| @parsed_graph = g }
+  end
+
+  def was_outputed_at_least_once?
+    !!@was_outputed_at_least_once
   end
 end

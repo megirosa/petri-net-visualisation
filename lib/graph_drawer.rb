@@ -45,6 +45,7 @@ class GraphDrawer
 
   def place_node(cursor_x, cursor_y, node_name)
     adapter.place_node(cursor_x, cursor_y, node_name)
+    #TODO remove when placing works
     true
   end
 
