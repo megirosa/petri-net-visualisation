@@ -1,9 +1,7 @@
-require_relative 'graph_adapter'
-
 class Page
-  attr_accessor :places, :transitions, :adapter
-
+  attr_accessor :places, :transitions, :adapter, :name
   @@created = nil
+  @@created_subpage = nil
 
   def self.created
     @@created
@@ -13,10 +11,31 @@ class Page
     @@created = value
   end
 
-  def initialize
+  def self.created_subpage
+    @@created_subpage
+  end
+  
+  def self.created_subpage=(value)
+    @@created_subpage = value
+  end
+
+  def self.clear_created
+    @@created = nil
+  end
+
+  def self.clear_created_subpage
+    @@created_subpage = nil
+  end
+
+  def self.working_page
+    @@created_subpage || @@created
+  end
+
+  def initialize(name)
+    @name = name
     @places = []
     @transitions = []
-    @adapter = GraphAdapter.new
+    @adapter = GraphAdapter.new(name)
   end
 
   def translate_dsl
@@ -39,6 +58,11 @@ class Page
 
   def draw
     adapter.draw
+  end
+
+  def prepare
+    translate_dsl
+    draw
   end
 
   def find_transition(name)

@@ -1,5 +1,3 @@
-require_relative 'calculations'
-
 class GraphFileWriter
   include Calculations
   attr_accessor :graph_file
@@ -39,17 +37,16 @@ class GraphFileWriter
   private
 
   def read
-    @graph_file = IO.read("tmp/output.dot")
+    @graph_file = IO.read(Pather.current_dot_path)
   end
 
   def write(lines)
-    IO.write("tmp/output.dot", lines)
+    IO.write(Pather.current_dot_path, lines)
   end
 
   def parse
-    parsed_graph = GraphViz.parse("tmp/output.dot")
-    #parsed_graph.output(png: "tmp/output.png", use: "neato")
-    `neato -q2 -Tpng -n -o tmp/output.png tmp/output.png`
+    parsed_graph = GraphViz.parse(Pather.current_dot_path)
+    `neato -q2 -Tpng -n -o#{Pather.new_path(MultiPage.current_page_name)} #{Pather.current_dot_path}`  
   end
 
   def position_line?(line)
@@ -58,14 +55,6 @@ class GraphFileWriter
 
   def searched_name_line?(line, node_name)
     line.include?("label=#{node_name}")
-  end
-
-  def inch?(line)
-    line =~ /\./ 
-  end
-
-  def to_inches!(line)
-    line.gsub!(/\d+/){ |match| (1/72.0*match.to_i/1.37).round(3).to_s }
   end
 
   def freeze!(line)

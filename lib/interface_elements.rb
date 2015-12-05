@@ -1,5 +1,3 @@
-require_relative 'graph_drawer'
-
 module InterfaceElements
   attr_accessor :drawer
 
@@ -49,7 +47,7 @@ module InterfaceElements
   end
 
   def draw_net
-    $net_image = image("tmp/output.png", margin: 10)
+    $net_image = image(Pather.path(MultiPage.current_page_name), margin: 10)
     $net_image.click do |image|
       if selected?
         place_node

@@ -1,13 +1,8 @@
-require_relative 'page'
-require_relative 'place'
-require_relative 'transition'
-require_relative 'dsl_functions'
-
 class GraphDrawer
   attr_accessor :current_page, :adapter
 
   def initialize
-    @current_page = Page::created
+    @current_page = MultiPage.current_page
     @adapter = @current_page.adapter
   end
 

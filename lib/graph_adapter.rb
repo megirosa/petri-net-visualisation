@@ -1,12 +1,10 @@
-require_relative 'graph_file_writer'
-require_relative 'calculations'
-
 class GraphAdapter
   include Calculations
-  attr_accessor :nodes, :edges, :graph, :parsed_graph, :layout, :writer
+  attr_accessor :nodes, :edges, :graph, :parsed_graph, :layout, :writer, :page_name
 
-  def initialize(layout = "dot")
+  def initialize(page_name, layout = "dot")
     @layout = layout
+    @page_name = page_name
 
     @nodes = {}
     @edges = {}
@@ -50,7 +48,7 @@ class GraphAdapter
   end
 
   def draw
-    graph.output(png: "tmp/output.png", use: layout)
+    graph.output(png: png_path, use: layout)
   end
 
   def place_node(cursor_x, cursor_y, node_name)
@@ -63,6 +61,7 @@ class GraphAdapter
     if node
       node[:color] = "black"
     end
+    draw
   end
 
   def select_node(cursor_x, cursor_y)
@@ -119,13 +118,17 @@ class GraphAdapter
 
   def parse_graph
     unless was_outputed_at_least_once?
-      graph.output(dot: "tmp/output.dot", use: layout)
+      graph.output(dot: Pather.current_dot_path, use: layout)
       @was_outputed_at_least_once = true
     end
-    GraphViz.parse("tmp/output.dot") { |g| @parsed_graph = g }
+    GraphViz.parse(Pather.current_dot_path) { |g| @parsed_graph = g }
   end
 
   def was_outputed_at_least_once?
     !!@was_outputed_at_least_once
+  end
+
+  def png_path
+    Pather.path(page_name)
   end
 end
