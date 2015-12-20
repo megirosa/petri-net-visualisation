@@ -20,11 +20,21 @@ unless file
   return
 end
 
-load file
+Pather.clear_all
 
-Shoes.app(width: 800, title: "Petri Net") do
-  extend InterfaceElements
+begin
+  load file
+rescue MalformedDslError
+  puts "Could not parse DSL:\n  #{$!}"
+end
 
-  MultiPage.switch_to_first
-  update
+begin
+  Shoes.app(width: 1000, title: "Petri Net") do
+    extend InterfaceElements
+    
+    MultiPage.switch_to_first
+    update
+  end
+ensure
+  Pather.clear_all
 end

@@ -1,6 +1,6 @@
 class GraphAdapter
   include Calculations
-  attr_accessor :nodes, :edges, :graph, :parsed_graph, :layout, :writer, :page_name
+  attr_accessor :nodes, :edges, :graph, :parsed_graph, :layout, :writer, :page_name, :positions
 
   def initialize(page_name, layout = "dot")
     @layout = layout
@@ -8,6 +8,7 @@ class GraphAdapter
 
     @nodes = {}
     @edges = {}
+    @positions = {}
 
     @graph = GraphViz::new("page", "type" => "graph")
     @graph[:lwidth]  = 10
@@ -19,7 +20,7 @@ class GraphAdapter
   end
 
   def translate_dsl(places, transitions)
-    places.each { |place| add_place(place.name) }
+    places.each { |place| add_place(place.name, place.tokens) }
 
     transitions.each do |transition|
       nodes[transition.name] = graph.add_nodes(transition.name)
@@ -35,10 +36,10 @@ class GraphAdapter
     graph.add_edges(nodes[start_name], nodes[end_name], dir: "forward", arrowhead: "normal")
   end
 
-  def add_place(name)
+  def add_place(name, tokens = 0)
     nodes[name] = graph.add_nodes(name)
     nodes[name][:shape] = "circle"
-    nodes[name][:label] = name
+    update_label(name, tokens)
   end
 
   def add_transition(name)
@@ -47,12 +48,21 @@ class GraphAdapter
     nodes[name][:label] = name
   end
 
+  def update_label(name, tokens)
+    if tokens > 0
+      new_label = "<#{name}<BR/>#{"\u25cf " * tokens}>"
+    else
+      new_label = "#{name}"
+    end
+    nodes[name][:label] = new_label
+    writer.update_label(name, new_label) if was_outputed_at_least_once?
+  end
+
   def draw
     graph.output(png: png_path, use: layout)
   end
 
   def place_node(cursor_x, cursor_y, node_name)
-    puts node_name
     writer.freeze_positions
     writer.update_position(cursor_x, cursor_y, to_pixels(graph_height), node_name)
 
@@ -61,7 +71,6 @@ class GraphAdapter
     if node
       node[:color] = "black"
     end
-    draw
   end
 
   def select_node(cursor_x, cursor_y)
@@ -74,9 +83,19 @@ class GraphAdapter
     node_name
   end
 
-  def change_layout(layout)
-    @layout = layout
+  def change_layout(new_layout)
+    @layout = new_layout
     draw
+  end
+
+  def parse_graph
+    unless was_outputed_at_least_once?
+      graph.output(dot: Pather.current_dot_path, use: layout)
+      @was_outputed_at_least_once = true
+    end
+    GraphViz.parse(Pather.current_dot_path) { |g| @parsed_graph = g }
+  rescue AttributeError
+    puts "Graphviz error:\n #{$!}"
   end
 
   private
@@ -84,12 +103,12 @@ class GraphAdapter
   def find_node(cursor_x, cursor_y)
     parse_graph
     convert_positions
-    nodes.each do |node_name, positions|
-      node_x = positions[0]
-      node_y = positions[1]
+    positions.each do |node_name, coordinates|
+      node_x = coordinates[0]
+      node_y = coordinates[1]
       distance = calculate_distance(node_x, node_y, cursor_x, cursor_y)
 
-      return node_name if distance < 30 
+      return node_name if distance < 30
     end 
 
     nil
@@ -100,8 +119,8 @@ class GraphAdapter
   end
 
   def graph_height
-    if $net_image
-      to_points($net_image.height)
+    if InterfaceElements.net_image
+      to_points(InterfaceElements.net_image.height)
     else
       parsed_graph['bb'].to_s.tr('"','').split(',').last.to_i
     end
@@ -109,19 +128,10 @@ class GraphAdapter
 
   def convert_positions
     parsed_graph.each_node do |name, node|
-      nodes[name] = node[:pos].to_s.tr('"','').split(',').map(&:to_i)
-      # 4 - frame size
-      nodes[name][1] = to_pixels((graph_height - nodes[name][1])) + 4
-      nodes[name][0] = to_pixels(nodes[name][0]) + 4
+      positions[name] = node[:pos].to_s.tr('"','').split(',').map(&:to_i)
+      positions[name][1] = to_pixels((graph_height - positions[name][1])) + 4
+      positions[name][0] = to_pixels(positions[name][0]) + 4
     end
-  end
-
-  def parse_graph
-    unless was_outputed_at_least_once?
-      graph.output(dot: Pather.current_dot_path, use: layout)
-      @was_outputed_at_least_once = true
-    end
-    GraphViz.parse(Pather.current_dot_path) { |g| @parsed_graph = g }
   end
 
   def was_outputed_at_least_once?

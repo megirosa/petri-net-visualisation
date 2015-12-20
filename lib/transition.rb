@@ -11,6 +11,10 @@ class Transition
     @@created = value
   end
 
+  def fireable?
+    input_places.all? { |input| input.has_tokens? }
+  end
+
   def initialize(name)
     @name = name
     @input_places = []

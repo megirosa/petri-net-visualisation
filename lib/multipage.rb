@@ -16,9 +16,9 @@ module MultiPage
   def list
     @pages.keys.map do |name|
       if is_subpage?(name)
-        "--#{id}"
+        "---- #{name}"
       else
-        "#{id}"
+        "#{name}"
       end
     end
   end

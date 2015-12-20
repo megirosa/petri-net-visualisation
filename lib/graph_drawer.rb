@@ -10,6 +10,10 @@ class GraphDrawer
     current_page.places.map(&:name) + [""]
   end
 
+  def transitions_to_select
+    current_page.transitions.map(&:name)
+  end
+
   def add_place(name)
     raise DrawingError, "Empty place name." if name.empty?
     raise DrawingError, "Place with given name already exists." if current_page.find_place(name)

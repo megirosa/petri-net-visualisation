@@ -1,5 +1,6 @@
 class Page
   attr_accessor :places, :transitions, :adapter, :name
+
   @@created = nil
   @@created_subpage = nil
 
@@ -22,7 +23,7 @@ class Page
   def self.clear_created
     @@created = nil
   end
-
+ 
   def self.clear_created_subpage
     @@created_subpage = nil
   end
@@ -36,6 +37,23 @@ class Page
     @places = []
     @transitions = []
     @adapter = GraphAdapter.new(name)
+  end
+
+  def fire_transitions
+    adapter.parse_graph
+    
+    transition_to_fire = transitions.select { |transition| transition.fireable? }.sample
+    return false unless transition_to_fire
+    transition_to_fire.input_places.each { |input| move_token(:take, input) }
+    transition_to_fire.output_places.each { |output| move_token(:add, output) }
+    adapter.writer.parse
+    
+    true
+  end
+
+  def move_token(action, place)
+    place.send("#{action}_token")
+    adapter.update_label(place.name, place.tokens)
   end
 
   def translate_dsl
@@ -73,10 +91,10 @@ class Page
     places.detect{ |p| p.name == name }
   end
 
-  def export(name)
+  def export
     exported_places = places.map(&:export).join
     exported_transitions = transitions.map(&:export).join
     
-    "page :#{name} do\n#{exported_places}\n#{exported_transitions}end"
+    "page :#{@name} do\n#{exported_places}\n#{exported_transitions}end"
   end
 end

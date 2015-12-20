@@ -22,7 +22,7 @@ class GraphFileWriter
         update_next_position = true
       elsif position_line?(line) && update_next_position
         line.sub!(/\d+(\.\d+)?/){ |match| ((to_points(x) - 4)).round(3).to_s }
-        line.sub!(/,\d+(\.\d+)?/){ |match| ','+((to_points((graph_height-y)) - 4)).round(3).to_s }
+        line.sub!(/,\d+(\.\d+)?/){ |match| ',' + ((to_points((graph_height - y)) - 4)).round(3).to_s }
 
         freeze!(line)
         update_next_position = false
@@ -34,14 +34,18 @@ class GraphFileWriter
     parse
   end
 
-  private
+  def update_label(node_name, new_label)
+    read
+    
+    graph_edited_lines = graph_file.lines.map do |line|
+      if searched_name_line?(line, node_name)
+        "label=#{new_label},\n"
+      else
+        line
+      end
+    end.join
 
-  def read
-    @graph_file = IO.read(Pather.current_dot_path)
-  end
-
-  def write(lines)
-    IO.write(Pather.current_dot_path, lines)
+    write(graph_edited_lines)
   end
 
   def parse
@@ -49,12 +53,22 @@ class GraphFileWriter
     `neato -q2 -Tpng -n -o#{Pather.new_path(MultiPage.current_page_name)} #{Pather.current_dot_path}`  
   end
 
+  private
+
+  def read
+    @graph_file = File.open(Pather.current_dot_path, "r:UTF-8", &:read)
+  end
+
+  def write(lines)
+    IO.write(Pather.current_dot_path, lines)
+  end
+
   def position_line?(line)
     (line =~ /pos=/) && !(line =~ /(\-\>)|(\]\;$)/)
   end
 
   def searched_name_line?(line, node_name)
-    line.include?("label=#{node_name}")
+    line.include?("label=") && line.include?("#{node_name}")
   end
 
   def freeze!(line)
