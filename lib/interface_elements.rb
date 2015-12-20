@@ -80,12 +80,12 @@ module InterfaceElements
     end
   end
 
-  def fire_transitions_action()
+  def fire_transitions_action
     MultiPage.current_page.fire_transitions
     update
   end
 
-  def fire_continouously_action()
+  def fire_continouously_action
     @timer = animate(1) do |i|
       fired = MultiPage.current_page.fire_transitions
       @timer.stop unless fired
@@ -94,8 +94,8 @@ module InterfaceElements
     end
   end
 
-  def change_page_action(page_id)
-    MultiPage.current_page_name = page_id.tr('- ','').to_sym
+  def change_page_action(page_name)
+    MultiPage.current_page_name = page_name.tr('- ','').to_sym
     update
   end
 
