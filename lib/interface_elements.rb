@@ -80,25 +80,6 @@ module InterfaceElements
     end
   end
 
-  def fire_transitions_action
-    MultiPage.current_page.fire_transitions
-    update
-  end
-
-  def fire_continouously_action
-    @timer = animate(1) do |i|
-      fired = MultiPage.current_page.fire_transitions
-      @timer.stop unless fired
-
-      update
-    end
-  end
-
-  def change_page_action(page_name)
-    MultiPage.current_page_name = page_name.tr('- ','').to_sym
-    update
-  end
-
   def draw_net
     self.net_image = image(Pather.path(MultiPage.current_page_name), margin: 10)
     net_image.click do |image|
@@ -145,6 +126,25 @@ module InterfaceElements
   def change_layout_action(layout)
     drawer.change_layout(layout)
     update
+  end
+
+  def change_page_action(page_name)
+    MultiPage.current_page_name = page_name.tr('- ','').to_sym
+    update
+  end
+
+  def fire_transitions_action
+    MultiPage.current_page.fire_transitions
+    update
+  end
+
+  def fire_continouously_action
+    @timer = animate(1) do |i|
+      fired = MultiPage.current_page.fire_transitions
+      @timer.stop unless fired
+
+      update
+    end
   end
 
   def export_action
