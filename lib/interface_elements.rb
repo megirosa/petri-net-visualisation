@@ -2,6 +2,18 @@ module InterfaceElements
   attr_accessor :drawer
   @@net_image = nil
 
+  def self.net_image
+    @@net_image
+  end
+
+  def net_image
+    @@net_image
+  end
+
+  def net_image=(new_net_image)
+    @@net_image = new_net_image
+  end
+
   def update
     @drawer = GraphDrawer.new
     net_image.remove if net_image
@@ -152,18 +164,6 @@ module InterfaceElements
         end
       end
     end
-  end
-
-  def net_image
-    @@net_image
-  end
-
-  def net_image=(new_net_image)
-    @@net_image = new_net_image
-  end
-
-  def self.net_image
-    @@net_image
   end
 
   private
